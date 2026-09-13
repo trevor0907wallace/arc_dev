@@ -8,6 +8,11 @@ dist
 dist-ssr
 *.local
 
+# typescript build artifacts
+*.tsbuildinfo
+vite.config.js
+vite.config.d.ts
+
 # logs
 logs
 *.log
