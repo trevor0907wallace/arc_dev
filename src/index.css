@@ -1,0 +1,80 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    color-scheme: dark;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-space-950 text-ink font-sans antialiased;
+    /* Layered nebula glow painted with cheap radial gradients (no per-frame cost). */
+    background-color: #04050a;
+    background-image:
+      radial-gradient(60rem 60rem at 15% -10%, rgba(103, 232, 249, 0.10), transparent 60%),
+      radial-gradient(50rem 50rem at 90% 5%, rgba(167, 139, 250, 0.12), transparent 55%),
+      radial-gradient(70rem 70rem at 70% 90%, rgba(96, 165, 250, 0.08), transparent 60%);
+    background-attachment: fixed;
+    overflow-x: hidden;
+  }
+
+  /* Hide the native cursor only where a fine pointer drives the custom one. */
+  @media (pointer: fine) {
+    body.custom-cursor,
+    body.custom-cursor a,
+    body.custom-cursor button,
+    body.custom-cursor input,
+    body.custom-cursor textarea,
+    body.custom-cursor label {
+      cursor: none;
+    }
+  }
+
+  ::selection {
+    background: rgba(167, 139, 250, 0.35);
+    color: #fff;
+  }
+
+  /* Keyboard focus stays visible even with the custom cursor. */
+  :focus-visible {
+    outline: 2px solid rgba(103, 232, 249, 0.8);
+    outline-offset: 3px;
+    border-radius: 4px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+  }
+}
+
+@layer components {
+  .container-content {
+    @apply mx-auto w-full max-w-content px-6 sm:px-8;
+  }
+
+  .eyebrow {
+    @apply inline-flex items-center gap-2 text-xs font-medium uppercase tracking-[0.25em] text-nebula-cyan/80;
+  }
+
+  .card {
+    @apply rounded-2xl border border-white/[0.06] bg-white/[0.02] backdrop-blur-sm;
+  }
+
+  .link-underline {
+    @apply relative;
+  }
+  .link-underline::after {
+    content: '';
+    @apply absolute -bottom-0.5 left-0 h-px w-0 bg-nebula-cyan transition-all duration-300;
+  }
+  .link-underline:hover::after {
+    @apply w-full;
+  }
+}
