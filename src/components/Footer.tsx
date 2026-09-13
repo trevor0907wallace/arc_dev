@@ -18,34 +18,44 @@ export default function Footer() {
             </p>
           </div>
 
-          {hasSocial && (
-            <ul className="flex gap-5 text-sm">
-              {social.github && (
-                <li>
-                  <a
-                    href={social.github}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="link-underline text-ink-muted hover:text-ink"
-                  >
-                    GitHub
-                  </a>
-                </li>
-              )}
-              {social.linkedin && (
-                <li>
-                  <a
-                    href={social.linkedin}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="link-underline text-ink-muted hover:text-ink"
-                  >
-                    LinkedIn
-                  </a>
-                </li>
-              )}
-            </ul>
-          )}
+          <ul className="flex flex-wrap gap-5 text-sm">
+            <li>
+              <a
+                href={`mailto:${profile.email}`}
+                className="link-underline text-ink-muted hover:text-ink"
+              >
+                {profile.email}
+              </a>
+            </li>
+            {hasSocial && (
+              <>
+                {social.github && (
+                  <li>
+                    <a
+                      href={social.github}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="link-underline text-ink-muted hover:text-ink"
+                    >
+                      GitHub
+                    </a>
+                  </li>
+                )}
+                {social.linkedin && (
+                  <li>
+                    <a
+                      href={social.linkedin}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="link-underline text-ink-muted hover:text-ink"
+                    >
+                      LinkedIn
+                    </a>
+                  </li>
+                )}
+              </>
+            )}
+          </ul>
         </div>
 
         <div className="mt-10 flex flex-col gap-2 border-t border-white/5 pt-6 text-xs text-ink-faint sm:flex-row sm:items-center sm:justify-between">

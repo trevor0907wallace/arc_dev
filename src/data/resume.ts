@@ -5,7 +5,7 @@ export const profile = {
   name: 'Trevor Wallace',
   title: 'Senior Full-Stack Engineer',
   location: 'New York City, NY',
-  email: 'trev.wal@outlook.com',
+  email: 'trevorwallac@gmail.com',
   tagline:
     'I take web applications from architecture to production — the interface, the services behind it, and the infrastructure it runs on.',
   summary:

@@ -69,7 +69,27 @@ export default function Contact() {
               Have a project, a role, or a hard problem that needs an owner? Send a note and
               I&apos;ll get back to you.
             </p>
-            <p className="mt-8 text-sm text-ink-faint">
+            <a
+              href={`mailto:${profile.email}`}
+              className="link-underline mt-8 inline-flex items-center gap-2 text-ink-muted transition-colors hover:text-nebula-cyan"
+            >
+              <svg
+                aria-hidden="true"
+                viewBox="0 0 24 24"
+                className="h-4 w-4 shrink-0"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.6"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <rect x="3" y="5" width="18" height="14" rx="2" />
+                <path d="m3 7 9 6 9-6" />
+              </svg>
+              {profile.email}
+            </a>
+
+            <p className="mt-4 text-sm text-ink-faint">
               Based in {profile.location} · Open to remote
             </p>
           </Reveal>
