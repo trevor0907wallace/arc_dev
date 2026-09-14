@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react'
 import SpaceCanvas from './components/SpaceCanvas'
 import Navbar from './components/Navbar'
 import Footer from './components/Footer'
@@ -8,17 +9,37 @@ import Experience from './sections/Experience'
 import Skills from './sections/Skills'
 import Contact from './sections/Contact'
 
+type Theme = 'dark' | 'light'
+
+function getInitialTheme(): Theme {
+  const attr = document.documentElement.getAttribute('data-theme')
+  return attr === 'light' ? 'light' : 'dark'
+}
+
 export default function App() {
+  const [theme, setTheme] = useState<Theme>(getInitialTheme)
+
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', theme)
+    try {
+      localStorage.setItem('theme', theme)
+    } catch {
+      /* ignore storage errors (private mode, etc.) */
+    }
+  }, [theme])
+
+  const toggleTheme = () => setTheme((t) => (t === 'dark' ? 'light' : 'dark'))
+
   return (
     <>
-      <SpaceCanvas />
+      <SpaceCanvas theme={theme} />
       <a
         href="#about"
         className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded-lg focus:bg-space-800 focus:px-4 focus:py-2 focus:text-ink"
       >
         Skip to content
       </a>
-      <Navbar />
+      <Navbar theme={theme} onToggleTheme={toggleTheme} />
       <main className="relative z-10">
         <Hero />
         <About />

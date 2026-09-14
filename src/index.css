@@ -3,8 +3,63 @@
 @tailwind utilities;
 
 @layer base {
-  :root {
+  /* ---- Dark theme (default) ---- */
+  :root,
+  :root[data-theme='dark'] {
     color-scheme: dark;
+    --bg-950: 4 5 10;
+    --bg-900: 7 9 18;
+    --bg-800: 11 14 28;
+    --bg-700: 17 21 40;
+    --bg-600: 26 32 56;
+
+    --ink: 231 234 246;
+    --ink-muted: 154 163 189;
+    --ink-faint: 107 115 145;
+
+    --cyan: 103 232 249;
+    --violet: 167 139 250;
+    --blue: 96 165 250;
+
+    --hair: 255 255 255;
+
+    --card-bg: rgba(255, 255, 255, 0.025);
+    --card-border: rgba(255, 255, 255, 0.07);
+
+    --on-accent: #05060a;
+
+    --nebula-a: rgba(103, 232, 249, 0.1);
+    --nebula-b: rgba(167, 139, 250, 0.12);
+    --nebula-c: rgba(96, 165, 250, 0.08);
+  }
+
+  /* ---- Light theme ---- */
+  :root[data-theme='light'] {
+    color-scheme: light;
+    --bg-950: 244 246 251; /* page */
+    --bg-900: 255 255 255;
+    --bg-800: 234 238 246;
+    --bg-700: 222 227 238;
+    --bg-600: 210 216 230;
+
+    --ink: 15 23 42;
+    --ink-muted: 71 85 105;
+    --ink-faint: 100 116 139;
+
+    --cyan: 8 145 178; /* cyan-600, darker for contrast on light */
+    --violet: 124 58 237; /* violet-600 */
+    --blue: 37 99 235; /* blue-600 */
+
+    --hair: 15 23 42;
+
+    --card-bg: #ffffff;
+    --card-border: rgba(15, 23, 42, 0.1);
+
+    --on-accent: #ffffff;
+
+    --nebula-a: rgba(8, 145, 178, 0.1);
+    --nebula-b: rgba(124, 58, 237, 0.09);
+    --nebula-c: rgba(37, 99, 235, 0.07);
   }
 
   html {
@@ -14,13 +69,15 @@
   body {
     @apply bg-space-950 text-ink font-sans antialiased;
     /* Layered nebula glow painted with cheap radial gradients (no per-frame cost). */
-    background-color: #04050a;
     background-image:
-      radial-gradient(60rem 60rem at 15% -10%, rgba(103, 232, 249, 0.10), transparent 60%),
-      radial-gradient(50rem 50rem at 90% 5%, rgba(167, 139, 250, 0.12), transparent 55%),
-      radial-gradient(70rem 70rem at 70% 90%, rgba(96, 165, 250, 0.08), transparent 60%);
+      radial-gradient(60rem 60rem at 15% -10%, var(--nebula-a), transparent 60%),
+      radial-gradient(50rem 50rem at 90% 5%, var(--nebula-b), transparent 55%),
+      radial-gradient(70rem 70rem at 70% 90%, var(--nebula-c), transparent 60%);
     background-attachment: fixed;
     overflow-x: hidden;
+    transition:
+      background-color 0.4s ease,
+      color 0.4s ease;
   }
 
   /* Hide the native cursor only where a fine pointer drives the custom one. */
@@ -36,13 +93,12 @@
   }
 
   ::selection {
-    background: rgba(167, 139, 250, 0.35);
+    background: rgb(var(--violet) / 0.35);
     color: #fff;
   }
 
-  /* Keyboard focus stays visible even with the custom cursor. */
   :focus-visible {
-    outline: 2px solid rgba(103, 232, 249, 0.8);
+    outline: 2px solid rgb(var(--cyan) / 0.85);
     outline-offset: 3px;
     border-radius: 4px;
   }
@@ -60,11 +116,13 @@
   }
 
   .eyebrow {
-    @apply inline-flex items-center gap-2 text-xs font-medium uppercase tracking-[0.25em] text-nebula-cyan/80;
+    @apply inline-flex items-center gap-2 text-xs font-medium uppercase tracking-[0.25em] text-nebula-cyan;
   }
 
   .card {
-    @apply rounded-2xl border border-white/[0.06] bg-white/[0.02] backdrop-blur-sm;
+    @apply rounded-2xl backdrop-blur-sm;
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
   }
 
   .link-underline {

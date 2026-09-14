@@ -3,19 +3,20 @@ import { useEffect, useRef } from 'react'
 /**
  * A single full-screen canvas that renders three things in one animation loop:
  *   1. A parallax starfield (subtle twinkle + gentle drift).
- *   2. Occasional background shooting stars.
+ *   2. Occasional shooting stars.
  *   3. A custom cursor: a soft dot that trails "shooting star" particles.
  *
- * Performance notes:
- *   - One requestAnimationFrame loop, delta-time based.
- *   - Device pixel ratio is capped at 2 to bound fill cost on hi-dpi screens.
- *   - Glow is a pre-rendered sprite drawn with drawImage — no per-particle
- *     radial gradients and no shadowBlur (both are expensive per frame).
- *   - Trail particles come from a fixed-size pool; dead ones are reused (no GC churn).
- *   - The loop pauses when the tab is hidden.
- *   - Honors prefers-reduced-motion (static field, native cursor, no loop) and
- *     skips the custom cursor entirely on coarse-pointer (touch) devices.
+ * Theme-aware: on dark it uses additive glow with light stars; on light it uses
+ * normal compositing with darker stars, an accent-colored trail, and a dark dot
+ * (additive glow is invisible on a light background).
+ *
+ * Performance: one rAF loop (delta-time based), DPR capped at 2, a pre-rendered
+ * glow sprite drawn with drawImage (no per-particle gradients / no shadowBlur),
+ * an object-pooled particle system, and a loop that pauses when the tab is hidden.
+ * Honors prefers-reduced-motion and skips the custom cursor on touch devices.
  */
+
+type Theme = 'dark' | 'light'
 
 type Star = {
   x: number
@@ -24,7 +25,7 @@ type Star = {
   baseAlpha: number
   twPhase: number
   twSpeed: number
-  depth: number // 0..1, drives parallax + drift speed
+  depth: number
 }
 
 type Particle = {
@@ -32,10 +33,10 @@ type Particle = {
   y: number
   vx: number
   vy: number
-  life: number // remaining, seconds
+  life: number
   maxLife: number
   size: number
-  hue: 0 | 1 // 0 = cyan-white, 1 = violet
+  hue: 0 | 1
   active: boolean
 }
 
@@ -66,7 +67,7 @@ function makeGlowSprite(size: number, r: number, g: number, b: number): HTMLCanv
   return c
 }
 
-export default function SpaceCanvas() {
+export default function SpaceCanvas({ theme }: { theme: Theme }) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null)
 
   useEffect(() => {
@@ -74,6 +75,31 @@ export default function SpaceCanvas() {
     if (!canvas) return
     const ctx = canvas.getContext('2d', { alpha: true })
     if (!ctx) return
+
+    const isLight = theme === 'light'
+    const palette = isLight
+      ? {
+          star: '#334155',
+          starAlpha: 0.55,
+          composite: 'source-over' as GlobalCompositeOperation,
+          glowA: [6, 182, 212] as const, // cyan-500
+          glowB: [139, 92, 246] as const, // violet-500
+          dot: '#0f172a',
+          shooter: '71,85,105',
+          ringAlpha: 0.2,
+          trailAlpha: 0.8,
+        }
+      : {
+          star: '#dfe7ff',
+          starAlpha: 1,
+          composite: 'lighter' as GlobalCompositeOperation,
+          glowA: [210, 245, 255] as const,
+          glowB: [175, 150, 255] as const,
+          dot: '#eafbff',
+          shooter: '210,245,255',
+          ringAlpha: 0.5,
+          trailAlpha: 0.9,
+        }
 
     const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
     const finePointer = window.matchMedia('(pointer: fine)').matches
@@ -83,14 +109,12 @@ export default function SpaceCanvas() {
     let height = 0
     let dpr = Math.min(window.devicePixelRatio || 1, 2)
 
-    // Pre-rendered glow sprites (drawn scaled per element).
-    const glowCyan = makeGlowSprite(64, 210, 245, 255)
-    const glowViolet = makeGlowSprite(64, 175, 150, 255)
+    const glowA = makeGlowSprite(64, palette.glowA[0], palette.glowA[1], palette.glowA[2])
+    const glowB = makeGlowSprite(64, palette.glowB[0], palette.glowB[1], palette.glowB[2])
 
     let stars: Star[] = []
 
     const buildStars = () => {
-      // Density scales with area but is capped for large displays.
       const count = Math.min(Math.round((width * height) / 5200), 480)
       stars = new Array(count)
       for (let i = 0; i < count; i++) {
@@ -99,7 +123,7 @@ export default function SpaceCanvas() {
           x: Math.random() * width,
           y: Math.random() * height,
           r: 0.4 + depth * 1.3,
-          baseAlpha: 0.35 + Math.random() * 0.5,
+          baseAlpha: (0.35 + Math.random() * 0.5) * palette.starAlpha,
           twPhase: Math.random() * Math.PI * 2,
           twSpeed: 0.6 + Math.random() * 1.6,
           depth,
@@ -120,28 +144,24 @@ export default function SpaceCanvas() {
     }
     resize()
 
-    // ---- Static render path for reduced motion ----
-    if (reduceMotion) {
+    const drawStaticStars = () => {
       ctx.clearRect(0, 0, width, height)
+      ctx.fillStyle = palette.star
       for (const s of stars) {
         ctx.globalAlpha = s.baseAlpha
-        ctx.fillStyle = '#dfe7ff'
         ctx.beginPath()
         ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2)
         ctx.fill()
       }
       ctx.globalAlpha = 1
+    }
+
+    // ---- Static render path for reduced motion ----
+    if (reduceMotion) {
+      drawStaticStars()
       const onResizeStatic = () => {
         resize()
-        ctx.clearRect(0, 0, width, height)
-        for (const s of stars) {
-          ctx.globalAlpha = s.baseAlpha
-          ctx.fillStyle = '#dfe7ff'
-          ctx.beginPath()
-          ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2)
-          ctx.fill()
-        }
-        ctx.globalAlpha = 1
+        drawStaticStars()
       }
       window.addEventListener('resize', onResizeStatic)
       return () => window.removeEventListener('resize', onResizeStatic)
@@ -150,7 +170,6 @@ export default function SpaceCanvas() {
     // ---- Animated path ----
     if (useCursor) document.body.classList.add('custom-cursor')
 
-    // Cursor state
     let targetX = width / 2
     let targetY = height / 2
     let dotX = targetX
@@ -160,13 +179,11 @@ export default function SpaceCanvas() {
     let pointerInside = false
     let isPressed = false
 
-    // Parallax target (normalized -1..1 from center), eased.
     let paraTX = 0
     let paraTY = 0
     let paraX = 0
     let paraY = 0
 
-    // Particle pool
     const particles: Particle[] = new Array(MAX_PARTICLES)
     for (let i = 0; i < MAX_PARTICLES; i++) {
       particles[i] = { x: 0, y: 0, vx: 0, vy: 0, life: 0, maxLife: 1, size: 1, hue: 0, active: false }
@@ -180,7 +197,7 @@ export default function SpaceCanvas() {
       const a = Math.random() * Math.PI * 2
       const sp = Math.random() * 14
       p.vx = Math.cos(a) * sp
-      p.vy = Math.sin(a) * sp + 6 // slight downward bias, like falling embers
+      p.vy = Math.sin(a) * sp + 6
       p.maxLife = 0.5 + Math.random() * 0.5
       p.life = p.maxLife
       p.size = 2 + Math.random() * 3.5
@@ -188,7 +205,6 @@ export default function SpaceCanvas() {
       p.active = true
     }
 
-    // Shooter pool
     const shooters: Shooter[] = new Array(MAX_SHOOTERS)
     for (let i = 0; i < MAX_SHOOTERS; i++) {
       shooters[i] = { x: 0, y: 0, vx: 0, vy: 0, len: 0, life: 0, maxLife: 1, active: false }
@@ -210,7 +226,6 @@ export default function SpaceCanvas() {
       s.active = true
     }
 
-    // Events
     const onMove = (e: PointerEvent) => {
       targetX = e.clientX
       targetY = e.clientY
@@ -251,27 +266,24 @@ export default function SpaceCanvas() {
     }
     document.addEventListener('visibilitychange', onVisibility)
 
-    let onResize: () => void = () => {}
-    onResize = () => resize()
+    const onResize = () => resize()
     window.addEventListener('resize', onResize)
 
     const frame = (now: number) => {
       let dt = (now - last) / 1000
       last = now
-      if (dt > 0.05) dt = 0.05 // clamp after tab-switch / stalls
+      if (dt > 0.05) dt = 0.05
       const t = now / 1000
 
       ctx.clearRect(0, 0, width, height)
 
-      // Eased parallax
       paraX += (paraTX - paraX) * Math.min(1, dt * 3)
       paraY += (paraTY - paraY) * Math.min(1, dt * 3)
 
       // --- Stars (source-over) ---
-      ctx.fillStyle = '#dfe7ff'
+      ctx.fillStyle = palette.star
       for (let i = 0; i < stars.length; i++) {
         const s = stars[i]
-        // gentle upward drift, wrap around
         s.y -= s.depth * 4 * dt
         if (s.y < -2) s.y = height + 2
         const px = s.x - paraX * s.depth * 14
@@ -288,10 +300,9 @@ export default function SpaceCanvas() {
       }
       ctx.globalAlpha = 1
 
-      // --- Glowing elements (additive) ---
-      ctx.globalCompositeOperation = 'lighter'
+      // --- Glowing elements ---
+      ctx.globalCompositeOperation = palette.composite
 
-      // Shooting stars
       nextShooterIn -= dt
       if (nextShooterIn <= 0) {
         spawnShooter()
@@ -307,34 +318,29 @@ export default function SpaceCanvas() {
         }
         s.x += s.vx * dt
         s.y += s.vy * dt
-        const k = Math.min(1, s.life / s.maxLife) // fade near end
-        const nx = s.vx
-        const ny = s.vy
-        const inv = 1 / Math.hypot(nx, ny)
-        const tailX = s.x - nx * inv * s.len
-        const tailY = s.y - ny * inv * s.len
+        const k = Math.min(1, s.life / s.maxLife)
+        const inv = 1 / Math.hypot(s.vx, s.vy)
+        const tailX = s.x - s.vx * inv * s.len
+        const tailY = s.y - s.vy * inv * s.len
         const grd = ctx.createLinearGradient(s.x, s.y, tailX, tailY)
-        grd.addColorStop(0, `rgba(210,245,255,${0.9 * k})`)
-        grd.addColorStop(1, 'rgba(210,245,255,0)')
+        grd.addColorStop(0, `rgba(${palette.shooter},${0.9 * k})`)
+        grd.addColorStop(1, `rgba(${palette.shooter},0)`)
         ctx.strokeStyle = grd
         ctx.lineWidth = 2
         ctx.beginPath()
         ctx.moveTo(s.x, s.y)
         ctx.lineTo(tailX, tailY)
         ctx.stroke()
-        // bright head
         const hs = 10
         ctx.globalAlpha = k
-        ctx.drawImage(glowCyan, s.x - hs / 2, s.y - hs / 2, hs, hs)
+        ctx.drawImage(glowA, s.x - hs / 2, s.y - hs / 2, hs, hs)
         ctx.globalAlpha = 1
       }
 
-      // Cursor: ease the dot toward the pointer for buttery movement
       dotX += (targetX - dotX) * Math.min(1, dt * 22)
       dotY += (targetY - dotY) * Math.min(1, dt * 22)
 
       if (useCursor && pointerInside) {
-        // Emit trail particles proportional to speed, along the path travelled.
         const dx = dotX - prevDotX
         const dy = dotY - prevDotY
         const dist = Math.hypot(dx, dy)
@@ -348,7 +354,6 @@ export default function SpaceCanvas() {
       prevDotX = dotX
       prevDotY = dotY
 
-      // Update + draw particles
       for (let i = 0; i < MAX_PARTICLES; i++) {
         const p = particles[i]
         if (!p.active) continue
@@ -360,29 +365,22 @@ export default function SpaceCanvas() {
         p.x += p.vx * dt
         p.y += p.vy * dt
         p.vx *= 0.92
-        p.vy = p.vy * 0.92 + 12 * dt // mild gravity
+        p.vy = p.vy * 0.92 + 12 * dt
         const lifeK = p.life / p.maxLife
         const size = p.size * (0.4 + lifeK * 0.9) * 3.2
-        ctx.globalAlpha = lifeK * 0.9
-        ctx.drawImage(
-          p.hue === 0 ? glowCyan : glowViolet,
-          p.x - size / 2,
-          p.y - size / 2,
-          size,
-          size,
-        )
+        ctx.globalAlpha = lifeK * palette.trailAlpha
+        ctx.drawImage(p.hue === 0 ? glowA : glowB, p.x - size / 2, p.y - size / 2, size, size)
       }
       ctx.globalAlpha = 1
 
-      // Cursor dot (drawn last, on top)
       if (useCursor && pointerInside) {
         const ring = isPressed ? 30 : 40
-        ctx.globalAlpha = 0.5
-        ctx.drawImage(glowViolet, dotX - ring / 2, dotY - ring / 2, ring, ring)
+        ctx.globalAlpha = palette.ringAlpha
+        ctx.drawImage(glowB, dotX - ring / 2, dotY - ring / 2, ring, ring)
         ctx.globalAlpha = 1
         ctx.globalCompositeOperation = 'source-over'
         const dotR = isPressed ? 3 : 4
-        ctx.fillStyle = '#eafbff'
+        ctx.fillStyle = palette.dot
         ctx.beginPath()
         ctx.arc(dotX, dotY, dotR, 0, Math.PI * 2)
         ctx.fill()
@@ -406,13 +404,7 @@ export default function SpaceCanvas() {
       }
       document.body.classList.remove('custom-cursor')
     }
-  }, [])
+  }, [theme])
 
-  return (
-    <canvas
-      ref={canvasRef}
-      aria-hidden="true"
-      className="pointer-events-none fixed inset-0 z-0"
-    />
-  )
+  return <canvas ref={canvasRef} aria-hidden="true" className="pointer-events-none fixed inset-0 z-0" />
 }

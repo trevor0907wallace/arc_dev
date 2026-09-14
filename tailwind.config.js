@@ -1,26 +1,30 @@
 /** @type {import('tailwindcss').Config} */
 export default {
+  darkMode: ['selector', '[data-theme="dark"]'],
   content: ['./index.html', './src/**/*.{ts,tsx}'],
   theme: {
     extend: {
       colors: {
+        // All palette tokens are backed by CSS variables so they flip with the theme.
         space: {
-          950: '#04050a',
-          900: '#070912',
-          800: '#0b0e1c',
-          700: '#111528',
-          600: '#1a2038',
+          950: 'rgb(var(--bg-950) / <alpha-value>)',
+          900: 'rgb(var(--bg-900) / <alpha-value>)',
+          800: 'rgb(var(--bg-800) / <alpha-value>)',
+          700: 'rgb(var(--bg-700) / <alpha-value>)',
+          600: 'rgb(var(--bg-600) / <alpha-value>)',
         },
         ink: {
-          DEFAULT: '#e7eaf6',
-          muted: '#9aa3bd',
-          faint: '#6b7391',
+          DEFAULT: 'rgb(var(--ink) / <alpha-value>)',
+          muted: 'rgb(var(--ink-muted) / <alpha-value>)',
+          faint: 'rgb(var(--ink-faint) / <alpha-value>)',
         },
         nebula: {
-          cyan: '#67e8f9',
-          violet: '#a78bfa',
-          blue: '#60a5fa',
+          cyan: 'rgb(var(--cyan) / <alpha-value>)',
+          violet: 'rgb(var(--violet) / <alpha-value>)',
+          blue: 'rgb(var(--blue) / <alpha-value>)',
         },
+        // Neutral "hairline" used for translucent borders/surfaces; white on dark, slate on light.
+        hair: 'rgb(var(--hair) / <alpha-value>)',
       },
       fontFamily: {
         display: ['"Space Grotesk"', 'system-ui', 'sans-serif'],

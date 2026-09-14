@@ -54,7 +54,7 @@ export default function Contact() {
   }
 
   const inputClass =
-    'w-full rounded-xl border border-white/10 bg-white/[0.03] px-4 py-3 text-ink placeholder:text-ink-faint transition-colors focus:border-nebula-cyan/50 focus:bg-white/[0.05] focus:outline-none'
+    'w-full rounded-xl border border-hair/10 bg-hair/[0.03] px-4 py-3 text-ink placeholder:text-ink-faint transition-colors focus:border-nebula-cyan/50 focus:bg-hair/[0.05] focus:outline-none'
 
   return (
     <section id="contact" className="relative scroll-mt-20 py-24 sm:py-32">
@@ -89,9 +89,7 @@ export default function Contact() {
               {profile.email}
             </a>
 
-            <p className="mt-4 text-sm text-ink-faint">
-              Based in {profile.location} · Open to remote
-            </p>
+            <p className="mt-4 text-sm text-ink-faint">Open to remote work · Available worldwide</p>
           </Reveal>
 
           <Reveal delay={0.1}>
@@ -147,7 +145,7 @@ export default function Contact() {
               <button
                 type="submit"
                 disabled={status === 'sending'}
-                className="mt-6 w-full rounded-full bg-gradient-to-r from-nebula-cyan to-nebula-violet px-6 py-3 text-sm font-semibold text-space-950 transition-transform hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-60"
+                className="mt-6 w-full rounded-full bg-gradient-to-r from-nebula-cyan to-nebula-violet px-6 py-3 text-sm font-semibold text-[color:var(--on-accent)] transition-transform hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-60"
               >
                 {status === 'sending' ? 'Sending…' : 'Send message'}
               </button>

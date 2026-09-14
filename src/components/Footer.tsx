@@ -5,7 +5,7 @@ export default function Footer() {
   const hasSocial = social.github || social.linkedin
 
   return (
-    <footer className="relative border-t border-white/5 py-12">
+    <footer className="relative border-t border-hair/10 py-12">
       <div className="container-content">
         <div className="flex flex-col gap-8 sm:flex-row sm:items-end sm:justify-between">
           <div>
@@ -13,7 +13,7 @@ export default function Footer() {
             <p className="mt-1 text-sm text-ink-muted">{profile.title}</p>
             <p className="mt-4 text-sm text-ink-faint">
               {education.degree} · {education.school}
-              <span className="mx-2 text-white/10">|</span>
+              <span className="mx-2 text-hair/20">|</span>
               {education.period}
             </p>
           </div>
@@ -58,7 +58,7 @@ export default function Footer() {
           </ul>
         </div>
 
-        <div className="mt-10 flex flex-col gap-2 border-t border-white/5 pt-6 text-xs text-ink-faint sm:flex-row sm:items-center sm:justify-between">
+        <div className="mt-10 flex flex-col gap-2 border-t border-hair/10 pt-6 text-xs text-ink-faint sm:flex-row sm:items-center sm:justify-between">
           <p>© {year} {profile.name}. All rights reserved.</p>
           <p>Built with React, TypeScript &amp; a little bit of the cosmos.</p>
         </div>
