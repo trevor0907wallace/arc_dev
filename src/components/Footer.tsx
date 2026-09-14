@@ -12,9 +12,7 @@ export default function Footer() {
             <p className="font-display text-lg font-semibold text-ink">{profile.name}</p>
             <p className="mt-1 text-sm text-ink-muted">{profile.title}</p>
             <p className="mt-4 text-sm text-ink-faint">
-              {education.degree} · {education.school}
-              <span className="mx-2 text-hair/20">|</span>
-              {education.period}
+              {education.degree}, {education.school}, {education.period}
             </p>
           </div>
 
@@ -59,8 +57,8 @@ export default function Footer() {
         </div>
 
         <div className="mt-10 flex flex-col gap-2 border-t border-hair/10 pt-6 text-xs text-ink-faint sm:flex-row sm:items-center sm:justify-between">
-          <p>© {year} {profile.name}. All rights reserved.</p>
-          <p>Built with React, TypeScript &amp; a little bit of the cosmos.</p>
+          <p>Copyright {year} {profile.name}. All rights reserved.</p>
+          <p>Built with React, TypeScript, and a little bit of the cosmos.</p>
         </div>
       </div>
     </footer>

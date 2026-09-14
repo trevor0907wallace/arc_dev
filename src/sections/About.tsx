@@ -12,7 +12,7 @@ export default function About() {
               Genuine depth across the whole stack.
             </h2>
             <p className="mt-6 text-ink-muted">
-              I&apos;ve led projects end to end as technical lead — owning architecture, mentoring
+              I&apos;ve led projects end to end as technical lead, owning architecture, mentoring
               engineers, and solving the problems others get stuck on.
             </p>
           </Reveal>

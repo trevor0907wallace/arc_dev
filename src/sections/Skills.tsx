@@ -47,8 +47,8 @@ type Tech = { name: string; Icon: IconType }
 type Group = { title: string; items: Tech[] }
 
 // Grouped technology logos. Icons are monochrome and inherit the theme color,
-// so they stay legible in both light and dark. (A few technologies — C#, SQL,
-// AWS, OpenAI — have no official brand glyph, so a fitting generic icon is used.)
+// so they stay legible in both light and dark. A few technologies (C#, SQL,
+// AWS, OpenAI) have no official brand glyph, so a fitting generic icon is used.
 const groups: Group[] = [
   {
     title: 'Languages',
@@ -100,7 +100,7 @@ const groups: Group[] = [
     ],
   },
   {
-    title: 'AI & LLM',
+    title: 'AI and LLM',
     items: [
       { name: 'Claude', Icon: SiClaude },
       { name: 'OpenAI', Icon: LuSparkles },
@@ -108,7 +108,7 @@ const groups: Group[] = [
     ],
   },
   {
-    title: 'Cloud & DevOps',
+    title: 'Cloud and DevOps',
     items: [
       { name: 'AWS', Icon: LuCloud },
       { name: 'Docker', Icon: SiDocker },

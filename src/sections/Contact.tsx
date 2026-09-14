@@ -10,7 +10,7 @@ import { profile } from '../data/resume'
  * mail client (mailto) addressed to the profile email.
  *
  * To use a real form service instead (e.g. Formspree), set VITE_FORM_ENDPOINT
- * in a .env file to your endpoint URL — the form will POST the fields as JSON.
+ * in a .env file to your endpoint URL, and the form will POST the fields as JSON.
  */
 const FORM_ENDPOINT = import.meta.env.VITE_FORM_ENDPOINT as string | undefined
 
@@ -48,7 +48,7 @@ export default function Contact() {
 
     // Fallback: open the visitor's email client.
     const subject = encodeURIComponent(`Portfolio enquiry from ${form.name}`)
-    const body = encodeURIComponent(`${form.message}\n\n— ${form.name} (${form.email})`)
+    const body = encodeURIComponent(`${form.message}\n\nFrom ${form.name}, ${form.email}`)
     window.location.href = `mailto:${profile.email}?subject=${subject}&body=${body}`
     setStatus('sent')
   }
@@ -89,7 +89,7 @@ export default function Contact() {
               {profile.email}
             </a>
 
-            <p className="mt-4 text-sm text-ink-faint">Open to remote work · Available worldwide</p>
+            <p className="mt-4 text-sm text-ink-faint">Open to remote work, available worldwide</p>
           </Reveal>
 
           <Reveal delay={0.1}>
@@ -153,7 +153,7 @@ export default function Contact() {
               <p aria-live="polite" className="mt-4 min-h-5 text-center text-sm">
                 {status === 'sent' && (
                   <span className="text-nebula-cyan">
-                    Thanks — your message is on its way. I&apos;ll be in touch soon.
+                    Thanks, your message is on its way. I&apos;ll be in touch soon.
                   </span>
                 )}
                 {status === 'error' && (
